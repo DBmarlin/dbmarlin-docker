@@ -19,9 +19,9 @@ spec:
         - name: DBMARLIN_AGENT_NAME
           value: "k8s-test-agent"
         - name: DBMARLIN_ARCHIVER_URL
-          value: "http://dbmarlin-server/archiver"
+          value: "http://dbmarlin-service:9090/archiver"
         - name: DBMARLIN_API_KEY
-          value: ""
+          value: "replace-with-base64-encoded-user:pass"
         resources:
           limits:
             cpu: "1"

@@ -1,3 +1,7 @@
 *.log
 .DS_Store
 .env
+
+k8s/agent-k8s/agent-k8s-external-service.yaml
+k8s/agent-k8s/agent-k8s-deploy-S1.yaml
+k8s/agent-k8s/agent-k8s-deploy-S2.yaml

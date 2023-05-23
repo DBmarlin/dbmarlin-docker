@@ -12,9 +12,16 @@ spec:
       labels:
         app: dbmarlin-server
     spec:
+      volumes:
+      - name: dbmarlin-volume
+        persistentVolumeClaim:
+          claimName: dbmarlin-pvc
       containers:
       - name: dbmarlin-server
         image: dbmarlin/dbmarlin-server:latest
+        volumeMounts:
+        - name: dbmarlin-volume
+          mountPath: /opt/dbmarlin/data
         resources:
           limits:
             cpu: "1"
@@ -22,3 +29,4 @@ spec:
           requests:
             cpu: "0.5"
             memory: "256Mi"
+

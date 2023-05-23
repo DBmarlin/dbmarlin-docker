@@ -7,4 +7,4 @@ fi
 
 version=$1
 
-docker run -d -t -i -p 9080:9080 --platform linux/amd64 --env-file .env dbmarlin-agent:$version
+docker run -d -t -i -p 9080:9080 --platform linux/amd64 --env-file .env dbmarlin/dbmarlin-agent:$version

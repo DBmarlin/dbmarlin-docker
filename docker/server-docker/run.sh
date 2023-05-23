@@ -7,4 +7,4 @@ fi
 
 version=$1
 
-docker run -d -t -i -p 9090:9090 --platform linux/amd64 dbmarlin-server:$version
+docker run -d -t -i -p 9090:9090 --platform linux/amd64 dbmarlin/dbmarlin-server:$version
