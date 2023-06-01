@@ -29,3 +29,9 @@ spec:
           requests:
             cpu: "0.5"
             memory: "256Mi"
+        livenessProbe:
+          tcpSocket:
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      restartPolicy: Always
