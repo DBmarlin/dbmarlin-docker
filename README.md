@@ -2,10 +2,9 @@
 
 Build Docker images of DBmarlin Server and DBmarlin Agent so they can be run in containers.
 
-> ⚠️ **Warning** - The DBmarlin Server Docker image is only intended for trying out DBmarlin quickly and not for continuous production monitoring. Currently there is no way to upgrade it without loosing your monitoring data.
-> 
+> ⚠️ **Warning** - The DBmarlin Server Docker image is only intended for trying out DBmarlin quickly and not for continuous production monitoring. Currently there is no way to upgrade it without losing your monitoring data.
 
-The DBmarlin Agent Docker image can be used for production monitoring.
+> The DBmarlin Agent Docker image can be used for production monitoring.
 
 # Pre-built images
 If you want to deploy these images without building them from the Dockerfiles here, you can pull them from Docker Hub Registry. 
@@ -25,7 +24,7 @@ cd docker/server-docker && ./build.sh [tag] && cd ..
 cd docker/agent-docker && ./build.sh [tag] && cd ..
 ```
 # Docker Compose
-To start 1x DBmarlin server and 2x DBmarlin images there is an example docker-compose.yaml file
+To start 1x DBmarlin server and 2x DBmarlin agents there is an example `docker-compose.yaml` file
 ```bash
 cd docker && docker-compose up
 ```
