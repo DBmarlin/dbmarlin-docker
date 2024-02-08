@@ -1,21 +1,21 @@
-version: '3.9'
+version: '4.1'
 
 services:
   my-dbmarlin-server:
-    image: dbmarlin-server:latest
+    image: dbmarlin/dbmarlin-server:latest
     platform: linux/amd64
     ports:
       - "9080:9080"
       - "9090:9090"
   my-dbmarlin-agent1:
-    image: dbmarlin-agent:latest
+    image: dbmarlin/dbmarlin-agent:latest
     platform: linux/amd64
     environment:
       DBMARLIN_AGENT_NAME: dbmarlin-remote-1
       DBMARLIN_ARCHIVER_URL: http://my-dbmarlin-server:9090/archiver
       DBMARLIN_API_KEY: 
   my-dbmarlin-agent2:
-    image: dbmarlin-agent:latest
+    image: dbmarlin/dbmarlin-agent:latest
     platform: linux/amd64
     environment:
       DBMARLIN_AGENT_NAME: dbmarlin-remote-2

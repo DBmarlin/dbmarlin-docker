@@ -22,7 +22,9 @@ RUN apt-get install iputils-ping -y
 RUN curl https://download.dbmarlin.com/dbmarlin-Linux-x64-$VERSION.tar.gz --output dbmarlin-Linux-x64-$VERSION.tar.gz
 RUN tar -xzvf dbmarlin-Linux-x64-$VERSION.tar.gz
 
-RUN chown dbmarlin:dbmarlin /opt/dbmarlin
+COPY start-and-tail.sh /opt/dbmarlin/start-and-tail.sh
+
+RUN chown -R dbmarlin:dbmarlin /opt/dbmarlin
 
 RUN chmod 777 -R /opt/dbmarlin
 
@@ -43,6 +45,6 @@ RUN ./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
 
 EXPOSE 9090
 
-# Execute the agent-start.sh script in the agent
-ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
-CMD [ "pwd && ls -l && whoami && /opt/dbmarlin/start.sh && sleep 5 && tail -F /opt/dbmarlin/tomcat/logs/localhost*.log" ]
+# Startup DBmarlin and tail logs
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["/opt/dbmarlin/start-and-tail.sh"]
