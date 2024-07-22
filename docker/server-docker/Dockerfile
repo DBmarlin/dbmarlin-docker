@@ -14,18 +14,27 @@ ENV LANG en_US.utf8
 
 WORKDIR /opt/
 
-RUN useradd dbmarlin 
+RUN mkdir /dbmarlin-install
+RUN mkdir /opt/dbmarlin
+RUN useradd dbmarlin
 RUN apt update -y
 RUN apt-get install curl inetutils-tools locales -y 
 RUN apt-get install iputils-ping -y
+RUN apt-get install net-tools -y
+RUN apt-get install apache2-utils -y
+RUN apt-get install openssl -y
+RUN apt-get install vim -y
 
 RUN curl https://download.dbmarlin.com/dbmarlin-Linux-x64-$VERSION.tar.gz --output dbmarlin-Linux-x64-$VERSION.tar.gz
-RUN tar -xzvf dbmarlin-Linux-x64-$VERSION.tar.gz
+RUN tar -xzvf dbmarlin-Linux-x64-$VERSION.tar.gz -C /dbmarlin-install/
 
 COPY start-and-tail.sh /opt/dbmarlin/start-and-tail.sh
+COPY start-and-tail.sh /dbmarlin-install/dbmarlin/start-and-tail.sh
 
+RUN chown -R dbmarlin:dbmarlin /dbmarlin-install
 RUN chown -R dbmarlin:dbmarlin /opt/dbmarlin
 
+RUN chmod 777 -R /dbmarlin-install
 RUN chmod 777 -R /opt/dbmarlin
 
 RUN rm dbmarlin-Linux-x64-$VERSION.tar.gz
@@ -39,9 +48,8 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL en_US.UTF-8 
 
-USER dbmarlin 
+USER dbmarlin
 WORKDIR /opt/dbmarlin
-RUN ./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
 
 EXPOSE 9090
 

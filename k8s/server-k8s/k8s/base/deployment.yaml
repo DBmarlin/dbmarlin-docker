@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbmarlin-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dbmarlin-server
+  template:
+    metadata:
+      labels:
+        app: dbmarlin-server
+    spec:
+      initContainers:
+      - name: dbmarlin-init
+        image: localhost:5000/dbmarlin-server:latest # Using a local container registry for dev purposes. Override in prod/deployment-patch.yaml
+        command: ["/bin/bash", "-c"]
+        args: ["cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin/"]
+      containers:
+      - name: dbmarlin-server
+        image: localhost:5000/dbmarlin-server:latest # Use same container image as the init container above
+        command: ["/bin/bash", "-c"]
+        args: ["while true; do /opt/dbmarlin/start-and-tail.sh; done"]
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "/opt/dbmarlin/stop.sh"]
+        resources: # Small default CPU/Memory settings. Override in prod/deployment-patch.yaml
+          limits:
+            cpu: "1"
+            memory: "1024Mi" 
+          requests:
+            cpu: "0.5"
+            memory: "256Mi"
+        livenessProbe:
+          tcpSocket:
+            port: 9080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      terminationGracePeriodSeconds: 60  # Wait 60s to allow processes to stop so new pod can write to the PersistentVolume

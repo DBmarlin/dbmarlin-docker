@@ -4,6 +4,15 @@ pwd
 whoami
 ls -l
 
+# Copy from /dbmarlin-install to /opt/dbmarlin
+cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
+
+# Change ownership of the data directory needed
+chmod 750 /opt/dbmarlin/postgresql/data
+
+# Run the configure script
+./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
+
 # Start DBmarlin application in the background
 /opt/dbmarlin/start.sh &
 

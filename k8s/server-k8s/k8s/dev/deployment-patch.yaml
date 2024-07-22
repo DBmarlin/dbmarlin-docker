@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      volumes:
+      - name: dbmarlin-volume
+        emptyDir: {}  # Add emptyDir here for development
+      initContainers:
+      - name: dbmarlin-init
+        volumeMounts:
+        - mountPath: /opt/dbmarlin
+          name: dbmarlin-volume
+      containers:
+      - name: dbmarlin-server
+        volumeMounts:
+        - mountPath: /opt/dbmarlin
+          name: dbmarlin-volume

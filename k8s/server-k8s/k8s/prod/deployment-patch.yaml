@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      volumes:
+      - name: dbmarlin-volume
+        persistentVolumeClaim:
+          claimName: dbmarlin-pvc
+      initContainers:
+      - name: dbmarlin-init
+        image: dbmarlin/dbmarlin-server:4.7.0 # Pull a tag like 4.7.0 or latest
+        volumeMounts:
+        - mountPath: /opt/dbmarlin
+          name: dbmarlin-volume
+      containers:
+      - name: dbmarlin-server
+        image: dbmarlin/dbmarlin-server:4.7.0 # Should be same image as the init container above
+        volumeMounts:
+        - mountPath: /opt/dbmarlin
+          name: dbmarlin-volume
+        resources:
+          limits:
+            cpu: "0.2"
+            memory: "512Mi"
+          requests:
+            cpu: "0.1"
+            memory: "256Mi"
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
