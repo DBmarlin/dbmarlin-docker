@@ -1,11 +1,25 @@
 #!/bin/bash
 
+# Function to handle termination signal
+term_handler() {
+  echo "Termination signal received, stopping services..."
+  
+  # Call your stop script to stop all services gracefully
+  /opt/dbmarlin/stop.sh
+  
+  # Exit the script
+  exit 0
+}
+
+# Trap SIGTERM signal
+trap 'term_handler' SIGTERM
+
 pwd
 whoami
 ls -l
 
 # Copy from /dbmarlin-install to /opt/dbmarlin
-cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
+# cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
 
 # Change ownership of the data directory needed
 chmod 750 /opt/dbmarlin/postgresql/data

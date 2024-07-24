@@ -4,6 +4,11 @@ metadata:
   name: dbmarlin-server
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
   selector:
     matchLabels:
       app: dbmarlin-server
@@ -16,7 +21,12 @@ spec:
       - name: dbmarlin-init
         image: localhost:5000/dbmarlin-server:latest # Using a local container registry for dev purposes. Override in prod/deployment-patch.yaml
         command: ["/bin/bash", "-c"]
-        args: ["cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin/"]
+        args: [
+          "echo 'Starting copy to /opt/dbmarlin/' && \
+          cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin/ && \
+          echo 'Copy operation completed successfully' || \
+          echo 'Copy operation failed'"
+        ]
       containers:
       - name: dbmarlin-server
         image: localhost:5000/dbmarlin-server:latest # Use same container image as the init container above
@@ -25,7 +35,7 @@ spec:
         lifecycle:
           preStop:
             exec:
-              command: ["/bin/sh", "-c", "/opt/dbmarlin/stop.sh"]
+              command: ["/bin/bash", "-c", "/opt/dbmarlin/stop.sh >> /opt/dbmarlin/tomcat/logs/localhost.$(date +%Y-%m-%d).log 2>&1 && sleep 10"]
         resources: # Small default CPU/Memory settings. Override in prod/deployment-patch.yaml
           limits:
             cpu: "1"

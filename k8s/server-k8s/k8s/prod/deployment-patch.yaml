@@ -23,11 +23,11 @@ spec:
           name: dbmarlin-volume
         resources:
           limits:
-            cpu: "0.2"
-            memory: "512Mi"
+            cpu: "1"
+            memory: "1024Mi"
           requests:
-            cpu: "0.1"
-            memory: "256Mi"
+            cpu: "0.5"
+            memory: "512Mi"
       securityContext:
         runAsUser: 1001
         runAsGroup: 1001
