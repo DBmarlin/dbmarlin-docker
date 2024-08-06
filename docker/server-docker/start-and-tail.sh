@@ -18,8 +18,11 @@ pwd
 whoami
 ls -l
 
-# Copy from /dbmarlin-install to /opt/dbmarlin
-# cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
+if [ -n $DOCKER ]
+then
+  # Only copy from /dbmarlin-install to /opt/dbmarlin if we run docker
+  cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
+fi
 
 # Change ownership of the data directory needed
 chmod 750 /opt/dbmarlin/postgresql/data
