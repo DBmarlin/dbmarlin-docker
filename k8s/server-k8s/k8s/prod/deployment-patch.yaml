@@ -11,13 +11,13 @@ spec:
           claimName: dbmarlin-pvc
       initContainers:
       - name: dbmarlin-init
-        image: dbmarlin/dbmarlin-server:4.7.0 # Pull a tag like 4.7.0 or latest
+        image: dbmarlin/dbmarlin-server:5.1.0 # Pull a tag like 4.12.0 or latest
         volumeMounts:
         - mountPath: /opt/dbmarlin
           name: dbmarlin-volume
       containers:
       - name: dbmarlin-server
-        image: dbmarlin/dbmarlin-server:4.7.0 # Should be same image as the init container above
+        image: dbmarlin/dbmarlin-server:5.1.0 # Should be same image as the init container above
         volumeMounts:
         - mountPath: /opt/dbmarlin
           name: dbmarlin-volume

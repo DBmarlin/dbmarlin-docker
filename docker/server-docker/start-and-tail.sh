@@ -30,6 +30,9 @@ chmod 750 /opt/dbmarlin/postgresql/data
 # Run the configure script
 ./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
 
+# Copy the start-and-tail.sh script to the /opt/dbmarlin directory (can get deleted by configure.sh)
+cp /dbmarlin-install/dbmarlin/start-and-tail.sh /opt/dbmarlin
+
 # Start DBmarlin application in the background
 /opt/dbmarlin/start.sh &
 

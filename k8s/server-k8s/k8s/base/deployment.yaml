@@ -8,7 +8,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1
-      maxSurge: 0
+      maxSurge: 1  # Allow 1 surge pod during updates
   selector:
     matchLabels:
       app: dbmarlin-server
@@ -39,7 +39,7 @@ spec:
         resources: # Small default CPU/Memory settings. Override in prod/deployment-patch.yaml
           limits:
             cpu: "1"
-            memory: "1024Mi" 
+            memory: "1024Mi"
           requests:
             cpu: "0.5"
             memory: "256Mi"
@@ -48,4 +48,9 @@ spec:
             port: 9080
           initialDelaySeconds: 60
           periodSeconds: 30
-      terminationGracePeriodSeconds: 60  # Wait 60s to allow processes to stop so new pod can write to the PersistentVolume
+        readinessProbe:  # Added readiness probe
+          tcpSocket:
+            port: 9080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      terminationGracePeriodSeconds: 60
