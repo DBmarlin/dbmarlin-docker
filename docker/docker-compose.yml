@@ -1,5 +1,3 @@
-version: '4.1'
-
 services:
   my-dbmarlin-server:
     image: dbmarlin/dbmarlin-server:latest

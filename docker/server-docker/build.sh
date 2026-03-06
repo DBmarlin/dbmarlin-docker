@@ -7,8 +7,8 @@ fi
 
 version=$1
 
-script -q /dev/null docker build \
+script -q /dev/null -c "docker build \
   -t dbmarlin/dbmarlin-server:$version \
   --build-arg VERSION=$version \
   -f Dockerfile \
-  . | tee build.log
+  ." | tee build.log
