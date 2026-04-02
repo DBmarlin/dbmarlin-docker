@@ -8,6 +8,7 @@ fi
 version=$1
 
 script -q /dev/null docker build \
+  --platform=linux/amd64 \
   -t dbmarlin/dbmarlin-server:$version \
   --build-arg VERSION=$version \
   -f Dockerfile \

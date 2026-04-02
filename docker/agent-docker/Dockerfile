@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 ubuntu:latest
+FROM ubuntu:latest
 
 ARG VERSION
 
@@ -10,7 +10,7 @@ LABEL name="DBmarlin Agent" \
       summary="DBmarlin agent" \
       description="DBmarlin agent running inside a container"
 
-ENV LANG en_US.utf8
+ENV LANG=en_US.utf8
 
 WORKDIR /opt/
 
@@ -35,11 +35,11 @@ RUN ls /usr/share/i18n/locales
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8 
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
-USER dbmarlin 
+USER dbmarlin
 WORKDIR /opt/dbmarlin
 
 EXPOSE 9080
