@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: dbmarlin-init
+          image: dbmarlin/dbmarlin-server:5.8.1
+      containers:
+        - name: dbmarlin-server
+          image: dbmarlin/dbmarlin-server:5.8.1
