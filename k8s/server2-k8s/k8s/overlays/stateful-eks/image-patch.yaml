@@ -3,11 +3,33 @@ kind: StatefulSet
 metadata:
   name: dbmarlin-server
 spec:
+  serviceName: dbmarlin-server
+  replicas: 1
+
+  volumeClaimTemplates:
+  - metadata:
+      name: dbmarlin-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: gp3
+      resources:
+        requests:
+          storage: 20Gi
+
+  template:
+    spec:
+      containers:
+      - name: dbmarlin-server
+        image: dbmarlin/dbmarlin-server:5.8.0
+        volumeMounts:
+        - name: dbmarlin-data
+          mountPath: /var/lib/postgresql/data
   template:
     spec:
       initContainers:
         - name: dbmarlin-init
-          image: dbmarlin/dbmarlin-server:latest
+          image: dbmarlin/dbmarlin-server:5.8.0
       containers:
         - name: dbmarlin-server
-          image: dbmarlin/dbmarlin-server:latest
+          image: dbmarlin/dbmarlin-server:5.8.0

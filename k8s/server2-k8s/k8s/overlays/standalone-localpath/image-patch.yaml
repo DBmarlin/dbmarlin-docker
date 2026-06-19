@@ -7,7 +7,7 @@ spec:
     spec:
       initContainers:
         - name: dbmarlin-init
-          image: dbmarlin/dbmarlin-server:latest
+          image: dbmarlin/dbmarlin-server:5.8.0
       containers:
         - name: dbmarlin-server
-          image: dbmarlin/dbmarlin-server:latest
+          image: dbmarlin/dbmarlin-server:5.8.0
