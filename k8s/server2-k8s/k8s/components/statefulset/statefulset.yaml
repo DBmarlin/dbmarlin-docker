@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  serviceName: dbmarlin-headless
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      app: dbmarlin-server
+  template:
+    metadata:
+      labels:
+        app: dbmarlin-server
+    spec:
+      terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: dbmarlin-init
+          image: dbmarlin/dbmarlin-server:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - /scripts/dbmarlin-upgrade-init.sh
+          volumeMounts:
+            - name: dbmarlin-storage
+              mountPath: /opt/dbmarlin
+            - name: dbmarlin-upgrade-init
+              mountPath: /scripts
+              readOnly: true
+      containers:
+        - name: dbmarlin-server
+          image: dbmarlin/dbmarlin-server:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -c
+          args:
+            - while true; do /opt/dbmarlin/start-and-tail.sh; done
+          ports:
+            - name: web
+              containerPort: 9090
+            - name: tomcat
+              containerPort: 9080
+            - name: postgres
+              containerPort: 9070
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - /opt/dbmarlin/stop.sh >> /opt/dbmarlin/tomcat/logs/localhost.$(date +%Y-%m-%d).log 2>&1 && sleep 10
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1024Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 9080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: dbmarlin-storage
+              mountPath: /opt/dbmarlin
+      volumes:
+        - name: dbmarlin-storage
+          persistentVolumeClaim:
+            claimName: dbmarlin-pvc
+        - name: dbmarlin-upgrade-init
+          configMap:
+            name: dbmarlin-upgrade-init
+            defaultMode: 0755

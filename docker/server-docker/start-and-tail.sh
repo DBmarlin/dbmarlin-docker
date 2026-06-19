@@ -25,7 +25,7 @@ then
 fi
 
 # Change ownership of the data directory needed
-chmod 750 /opt/dbmarlin/postgresql/data
+chmod 750 /opt/dbmarlin/postgresql/15/data
 
 # Run the configure script
 ./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
