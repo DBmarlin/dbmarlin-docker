@@ -1,0 +1,6 @@
+# Swap the dbmarlin-storage volume (index 0) from PVC to emptyDir
+- op: replace
+  path: /spec/template/spec/volumes/0
+  value:
+    name: dbmarlin-storage
+    emptyDir: {}

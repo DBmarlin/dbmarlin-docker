@@ -1,0 +1,50 @@
+# Runs everything as the image's dbmarlin user (UID 1001) so the pod passes the
+# `restricted` Pod Security Standard - no root init container. fsGroup makes the
+# volume group-writable to GID 1001, so no chown is needed and the init container
+# runs the copy and configure.sh directly as the pod user.
+#
+# Add this component AFTER ../../components/statefulset in your overlay's
+# components list. Do not use it on OpenShift - the restricted SCC assigns its
+# own arbitrary UID and rejects pods that request a fixed one; use the
+# stateful-openshift overlay instead.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+      - name: dbmarlin-copy
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+        args:
+        # Inherit PG_DATA_DIRS from the StatefulSet. Literal database paths in
+        # bash -c would make status.sh mistake this shell for a running database.
+        - >
+          set -e;
+          echo 'Starting copy to /opt/dbmarlin/';
+          cp -rf /dbmarlin-install/dbmarlin/. /opt/dbmarlin/;
+          echo 'Copy operation completed successfully';
+          cd /opt/dbmarlin;
+          for d in $PG_DATA_DIRS; do if [ -d "$d" ]; then chmod 750 "$d"; fi; done;
+          echo 'Starting configuration of DBmarlin';
+          ./configure.sh -a -n9090 -t9080 -p9070 -s${DBMARLIN_SIZE:-Small} -u;
+          echo 'Configuration completed successfully';
+      containers:
+      - name: dbmarlin-server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]

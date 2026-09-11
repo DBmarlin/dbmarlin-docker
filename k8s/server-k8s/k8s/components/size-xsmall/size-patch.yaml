@@ -1,0 +1,24 @@
+# XSmall profile: CPU/memory to match the DBmarlin hardware requirements.
+# Disk is NOT set here - size the PVC yourself in base/pvc.yaml (the deploy
+# script warns if it is below the recommendation for this profile).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: dbmarlin-copy
+        env:
+        - name: DBMARLIN_SIZE
+          value: XSmall
+      containers:
+      - name: dbmarlin-server
+        resources:
+          requests:
+            cpu: "1"
+            memory: 2Gi
+          limits:
+            cpu: "1"
+            memory: 2Gi

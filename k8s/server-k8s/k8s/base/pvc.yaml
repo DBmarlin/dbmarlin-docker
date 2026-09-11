@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: local-path # Overridden per overlay via storageclass-patch.yaml
   resources:
     requests:
       storage: 20Gi
-  storageClassName: gp2  # Use gp2 storage class for AWS EKS

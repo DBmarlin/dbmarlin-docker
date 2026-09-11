@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+components:
+  - ../../components/statefulset
+  - ../../components/size-xsmall
+
+patches:
+  # Dev boxes are small - keep the XSmall limits but lower the requests so the
+  # pod schedules on a laptop-sized node
+  - patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: dbmarlin-server
+      spec:
+        template:
+          spec:
+            # Resolve the current local-registry image for both install and runtime.
+            initContainers:
+            - name: dbmarlin-copy
+              imagePullPolicy: Always
+            containers:
+            - name: dbmarlin-server
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: "0.25"
+                  memory: 512Mi
+  # No persistent storage in dev - remove the PVC and use an emptyDir instead
+  - patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: dbmarlin-pvc
+  - path: emptydir-patch.yaml
+    target:
+      kind: StatefulSet
+      name: dbmarlin-server
+
+images:
+  - name: dbmarlin/dbmarlin-server
+    newName: localhost:5000/dbmarlin-server # Local container registry for dev purposes
+    newTag: latest

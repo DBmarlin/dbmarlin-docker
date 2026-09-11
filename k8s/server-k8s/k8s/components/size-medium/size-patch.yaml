@@ -1,0 +1,24 @@
+# Medium profile: CPU/memory to match the DBmarlin hardware requirements.
+# Disk is NOT set here - size the PVC yourself in base/pvc.yaml (the deploy
+# script warns if it is below the recommendation for this profile).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: dbmarlin-copy
+        env:
+        - name: DBMARLIN_SIZE
+          value: Medium
+      containers:
+      - name: dbmarlin-server
+        resources:
+          requests:
+            cpu: "2"
+            memory: 8Gi
+          limits:
+            cpu: "2"
+            memory: 8Gi

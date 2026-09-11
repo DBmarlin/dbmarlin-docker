@@ -1,0 +1,28 @@
+# OpenShift's restricted SCC runs every container as an arbitrary non-root UID
+# from the namespace's assigned range, so the init container cannot run as root.
+# This patch drops the root securityContext and runs the copy and configure.sh
+# directly as the pod user (no chown/runuser needed - the init and main
+# containers share the same UID, and the SCC's fsGroup covers the volume).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: dbmarlin-copy
+        securityContext: null
+        args:
+        # Inherit PG_DATA_DIRS from the StatefulSet. Literal database paths in
+        # bash -c would make status.sh mistake this shell for a running database.
+        - >
+          set -e;
+          echo 'Starting copy to /opt/dbmarlin/';
+          cp -rf /dbmarlin-install/dbmarlin/. /opt/dbmarlin/;
+          echo 'Copy operation completed successfully';
+          cd /opt/dbmarlin;
+          for d in $PG_DATA_DIRS; do if [ -d "$d" ]; then chmod 750 "$d"; fi; done;
+          echo 'Starting configuration of DBmarlin';
+          ./configure.sh -a -n9090 -t9080 -p9070 -s${DBMARLIN_SIZE:-Small} -u;
+          echo 'Configuration completed successfully';

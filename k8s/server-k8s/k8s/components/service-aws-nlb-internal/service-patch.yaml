@@ -1,0 +1,7 @@
+# Keep EKS access private until authentication and public access are configured.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dbmarlin-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal

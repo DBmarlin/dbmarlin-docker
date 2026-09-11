@@ -1,0 +1,10 @@
+# On EKS the load balancer controller provisions an *internal* NLB by default,
+# which requires subnets tagged kubernetes.io/role/internal-elb. This annotation
+# requests an internet-facing NLB instead, which uses subnets tagged
+# kubernetes.io/role/elb (the default tagging on public subnets).
+apiVersion: v1
+kind: Service
+metadata:
+  name: dbmarlin-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing

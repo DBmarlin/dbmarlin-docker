@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dbmarlin-server
+spec:
+  serviceName: dbmarlin-headless
+  replicas: 1
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      app: dbmarlin-server
+  template:
+    metadata:
+      labels:
+        app: dbmarlin-server
+    spec:
+      terminationGracePeriodSeconds: 60
+      initContainers:
+      - name: dbmarlin-copy
+        image: dbmarlin/dbmarlin-server:latest
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+        env:
+        - name: DBMARLIN_SIZE
+          value: Small
+        # Passed via env so the literal "postgresql" path never appears in the shell's
+        # command line - status.sh detects a running postgres with pgrep -f, which
+        # would otherwise match this container's own bash process and abort configure.sh
+        - name: PG_DATA_DIRS
+          value: /opt/dbmarlin/postgresql/data /opt/dbmarlin/postgresql/15/data
+        volumeMounts:
+        - mountPath: /opt/dbmarlin
+          name: dbmarlin-storage
+        command: ["/bin/bash", "-c"]
+        args:
+        - >
+          set -e;
+          dbmarlin_owner="$(stat -c '%u:%g' /dbmarlin-install/dbmarlin)";
+          echo 'Starting copy to /opt/dbmarlin/';
+          cp -a /dbmarlin-install/dbmarlin/. /opt/dbmarlin/;
+          echo 'Copy operation completed successfully';
+          chown -R "${dbmarlin_owner}" /opt/dbmarlin;
+          cd /opt/dbmarlin;
+          for d in $PG_DATA_DIRS; do [ -d "$d" ] && chmod 750 "$d"; done;
+          echo 'Starting configuration DBmarlin';
+          runuser -u dbmarlin -- ./configure.sh -a -n9090 -t9080 -p9070 -s${DBMARLIN_SIZE:-Small} -u;
+          echo 'Configuration completed successfully';
+      containers:
+        - name: dbmarlin-server
+          image: dbmarlin/dbmarlin-server:latest
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          # PG_DATA_DIRS kept out of the inline script for the same pgrep -f reason
+          # as the init container above
+          env:
+            - name: PG_DATA_DIRS
+              value: /opt/dbmarlin/postgresql/data /opt/dbmarlin/postgresql/15/data
+          args:
+            - |
+              set -e
+
+              for d in $PG_DATA_DIRS; do [ -d "$d" ] && chmod 750 "$d"; done
+
+              /opt/dbmarlin/start.sh
+
+              current_file=""
+              last=0
+
+              while true; do
+                file="/opt/dbmarlin/tomcat/logs/localhost.$(date +%Y-%m-%d).log"
+
+                if [ "$file" != "$current_file" ]; then
+                  current_file="$file"
+                  last=0
+                fi
+
+                if [ -f "$file" ]; then
+                  total=$(wc -l < "$file")
+
+                  if [ "$total" -gt "$last" ]; then
+                    start=$((last + 1))
+                    sed -n "${start},${total}p" "$file"
+                    last=$total
+                  fi
+                fi
+
+                sleep 60
+              done
+          ports:
+            - name: web
+              containerPort: 9090
+            - name: tomcat
+              containerPort: 9080
+            - name: postgres
+              containerPort: 9070
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - /opt/dbmarlin/stop.sh >> /opt/dbmarlin/tomcat/logs/localhost.$(date +%Y-%m-%d).log 2>&1 && sleep 10
+          # Defaults match the Small profile - override with a size-* component
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4Gi"
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+          livenessProbe:
+            tcpSocket:
+              port: 9080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            tcpSocket:
+              port: 9080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: dbmarlin-storage
+              mountPath: /opt/dbmarlin
+      volumes:
+        - name: dbmarlin-storage
+          persistentVolumeClaim:
+            claimName: dbmarlin-pvc
