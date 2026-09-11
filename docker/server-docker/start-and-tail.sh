@@ -24,11 +24,12 @@ then
   cp -r /dbmarlin-install/dbmarlin/* /opt/dbmarlin
 fi
 
-# Change ownership of the data directory needed
-chmod 750 /opt/dbmarlin/postgresql/data
+# PostgreSQL refuses to start if its data directory is group-writable or world-accessible
+[ -d /opt/dbmarlin/postgresql/data ] && chmod 750 /opt/dbmarlin/postgresql/data
+[ -d /opt/dbmarlin/postgresql/15/data ] && chmod 750 /opt/dbmarlin/postgresql/15/data
 
-# Run the configure script
-./configure.sh -a -n9090 -t9080 -p9070 -sSmall -u
+# Run the configure script (profile size can be overridden with the DBMARLIN_SIZE env var)
+./configure.sh -a -n9090 -t9080 -p9070 -s"${DBMARLIN_SIZE:-Small}" -u
 
 # Copy the start-and-tail.sh script to the /opt/dbmarlin directory (can get deleted by configure.sh)
 cp /dbmarlin-install/dbmarlin/start-and-tail.sh /opt/dbmarlin

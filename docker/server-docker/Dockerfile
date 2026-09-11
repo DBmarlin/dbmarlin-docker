@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
 ARG VERSION
 
@@ -36,6 +36,9 @@ RUN chown -R dbmarlin:dbmarlin /opt/dbmarlin
 
 RUN chmod 777 -R /dbmarlin-install
 RUN chmod 777 -R /opt/dbmarlin
+
+# PostgreSQL refuses to start if its data directory is group-writable or world-accessible
+RUN find /dbmarlin-install /opt/dbmarlin -type d \( -path '*/postgresql/data' -o -path '*/postgresql/*/data' \) -exec chmod 750 {} +
 
 RUN rm dbmarlin-Linux-x64-$VERSION.tar.gz
 
